@@ -1,0 +1,32 @@
+name: Segnala un difetto
+description: Qualcosa non funziona come dovrebbe
+labels: [difetto]
+body:
+  - type: textarea
+    id: cosa
+    attributes:
+      label: Cosa succede
+      description: Anche una riga va bene, purché sia precisa.
+    validations:
+      required: true
+  - type: textarea
+    id: come
+    attributes:
+      label: Come si riproduce
+      placeholder: |
+        1. Apro una cartella con…
+        2. Zoomo con la rotella
+        3. Clicco Passa
+        4. Il file salvato è…
+    validations:
+      required: true
+  - type: input
+    id: versione
+    attributes:
+      label: Versione dell'app
+      placeholder: 1.0.0 (la trovi nel nome del file scaricato)
+  - type: input
+    id: sistema
+    attributes:
+      label: Sistema
+      placeholder: Windows 11

@@ -1,0 +1,32 @@
+name: Proponi qualcosa
+description: Un'idea, una rifinitura, una funzione
+labels: [proposta]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Prima di scrivere: dai un occhio alla **filosofia** nel README e alla lista
+        di *cosa probabilmente non viene accolto* in CONTRIBUTING. Non è per
+        scoraggiarti — è per non farti perdere tempo su qualcosa che verrebbe
+        rifiutato per direzione, non per qualità.
+  - type: textarea
+    id: problema
+    attributes:
+      label: Quale problema risolve
+      description: Il problema, non la soluzione. Serve a capire se ci sono strade migliori.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Come lo risolveresti
+    validations:
+      required: true
+  - type: checkboxes
+    id: filosofia
+    attributes:
+      label: Coerenza con la direzione dell'app
+      options:
+        - label: Non aggiunge un'opzione da configurare per ogni utente
+        - label: Non allontana dal gesto centrale (guardare una foto e scegliere)
+        - label: Non richiede account, nuvola o connessione

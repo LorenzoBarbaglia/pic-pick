@@ -1,7 +1,7 @@
 {
   "name": "pic-pick",
   "productName": "pic&pick",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Smistatore e editor di foto locale: una foto alla volta, la scegli con una bolla.",
   "private": true,
   "main": "out/main/index.js",
@@ -73,5 +73,9 @@
       "artifactName": "pic-pick-${version}-portable.${ext}"
     },
     "publish": null
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LorenzoBarbaglia/pic-pick.git"
   }
 }
