@@ -1,0 +1,603 @@
+@import 'tailwindcss';
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* valori di partenza: il preset visivo li sovrascrive su :root a runtime */
+:root {
+  --pp-accent: #fbbf24;
+  --pp-accent-hover: #fcd34d;
+  --pp-accent-rgb: 251, 191, 36;
+  --pp-on-accent: #1c1917;
+  --pp-bg: #0c0a09;
+  --pp-stage: rgb(18, 16, 14);
+  --pp-veil: rgba(18, 16, 14, 0.55);
+  --pp-panel: rgba(255, 255, 255, 0.05);
+  /* il testo: pieno e attenuato — il futuro tema chiaro cambia solo qui */
+  --pp-ink: #e7e5e4;
+  --pp-ink-dim: #a8a29e;
+  /* superfici dell'interfaccia: pannelli, finestre, avvisi */
+  --pp-surface: rgba(12, 10, 9, 0.88);
+  --pp-scrim: rgba(0, 0, 0, 0.62);
+  /* l'inchiostro forte: dove prima c'era «bianco» */
+  --pp-ink-strong: #ffffff;
+  /* il bordo in evidenza, al passaggio del mouse */
+  --pp-line-strong: rgba(255, 255, 255, 0.40);
+  --pp-line: rgba(255, 255, 255, 0.1);
+  --pp-radius: 8px;
+  --pp-radius-lg: 12px;
+  --pp-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --pp-wobble-dur: 4.5s;
+  --pp-sheen-dur: 7s;
+}
+
+body {
+  overflow: hidden;
+  /* Il colore del testo viene dal mondo, non da una classe fissa: era
+     inchiodato al quasi-bianco, e ogni testo senza classe propria diventava
+     invisibile sul tema chiaro. */
+  color: var(--pp-ink);
+  /* il cambio di mondo visivo è una dissolvenza, non uno scatto */
+  background-color: var(--pp-bg);
+  transition:
+    background-color 0.5s ease,
+    color 0.5s ease;
+}
+
+/* --- microinterazioni dei comandi: il mondo decide come reagiscono al tocco --- */
+.pp-tool {
+  transition:
+    transform 180ms var(--pp-ease),
+    box-shadow 180ms ease,
+    filter 180ms ease;
+}
+.pp-tool:active:not(:disabled) {
+  transform: scale(var(--pp-press, 0.95));
+}
+/* Mare: si solleva */
+.pp-hover-lift:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.06);
+}
+/* Notte: si accende di un alone */
+.pp-hover-glow:hover:not(:disabled) {
+  transform: scale(1.04);
+  box-shadow: 0 0 22px rgba(var(--pp-accent-rgb), 0.5);
+}
+/* Brace: trema come una scintilla */
+.pp-hover-jitter:hover:not(:disabled) {
+  animation: tool-jitter 240ms steps(2, jump-none) infinite;
+}
+/* Camera oscura: emerge piano, come un'immagine nel bagno */
+.pp-hover-settle:hover:not(:disabled) {
+  transform: scale(1.03);
+  filter: brightness(1.2);
+}
+@keyframes tool-jitter {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(1.02);
+  }
+  25% {
+    transform: translate(-1px, 1px) rotate(-2deg) scale(1.03);
+  }
+  50% {
+    transform: translate(1px, -1px) rotate(2deg) scale(1.02);
+  }
+  75% {
+    transform: translate(1px, 1px) rotate(-1deg) scale(1.04);
+  }
+}
+
+/* modalità ufficio: i comandi non recitano, cambiano solo colore */
+.pp-tool-flat {
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+/* modalità ufficio: la foto entra e basta */
+@keyframes photo-office {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* becher dello sviluppo: il liquido oscilla e sale una bollicina */
+@keyframes beaker-slosh {
+  0%,
+  100% {
+    transform: rotate(-2.5deg) translateY(0);
+  }
+  50% {
+    transform: rotate(2.5deg) translateY(-0.6px);
+  }
+}
+@keyframes beaker-bubble {
+  from {
+    transform: translateY(0) scale(0.7);
+    opacity: 0;
+  }
+  35% {
+    opacity: 0.9;
+  }
+  to {
+    transform: translateY(-11px) scale(1.1);
+    opacity: 0;
+  }
+}
+
+/* pellicola della striscia: i fori scorrono quando è accesa */
+@keyframes film-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-8px);
+  }
+}
+
+/* --- barre di scorrimento: sottili e discrete, non quelle di sistema --- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--pp-accent-rgb), 0.35) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--pp-accent-rgb), 0.28);
+  border-radius: 99px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--pp-accent-rgb), 0.5);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* I comandi dello stage: una colonna sola, di tre misure possibili.
+   Nessun overflow: `overflow-y: auto` porta con sé il taglio orizzontale e
+   mangiava le etichette e l'alone delle icone al passaggio. La misura si adatta
+   all'altezza, quindi non serve scorrere. */
+.pp-tools {
+  --pp-tool-size: 48px;
+  --pp-tool-scale: 1;
+  overflow: visible;
+}
+.pp-tools[data-size='media'] {
+  --pp-tool-size: 40px;
+  --pp-tool-scale: 0.8;
+}
+.pp-tools[data-size='piccola'] {
+  --pp-tool-size: 32px;
+  --pp-tool-scale: 0.62;
+}
+
+/* pattern a scacchiera per rappresentare lo sfondo trasparente */
+/* separatore tra gruppi di comandi: verticale nella barra, orizzontale
+   nella colonna dei comandi (la colonna ha la classe pp-tools) */
+.pp-divider {
+  width: 1px;
+  height: 20px;
+}
+.pp-tools .pp-divider {
+  width: 32px;
+  height: 1px;
+}
+
+.checkerboard {
+  background-image: conic-gradient(#57534e 0 25%, #292524 0 50%, #57534e 0 75%, #292524 0);
+  background-size: 16px 16px;
+}
+
+/* ondeggiamento liquido delle bolle: morphing continuo del border-radius */
+@keyframes bubble-wobble {
+  0%,
+  100% {
+    border-radius: 48% 52% 51% 49% / 52% 46% 54% 48%;
+  }
+  25% {
+    border-radius: 54% 46% 44% 56% / 48% 56% 44% 52%;
+  }
+  50% {
+    border-radius: 45% 55% 56% 44% / 56% 44% 51% 49%;
+  }
+  75% {
+    border-radius: 52% 48% 46% 54% / 45% 53% 47% 55%;
+  }
+}
+
+.bubble-blob {
+  animation: bubble-wobble 4.5s ease-in-out infinite;
+}
+
+/* Notte — la lanterna non è liquida: respira, tonda e stabile */
+@keyframes bubble-breathe {
+  0%,
+  100% {
+    border-radius: 50%;
+    /* proprietà «scale» indipendente: non calpesta il transform dello squash */
+    scale: 1;
+  }
+  50% {
+    border-radius: 48% 52% 50% 50% / 50% 50% 52% 48%;
+    scale: 1.04;
+  }
+}
+
+/* Brace — la brace tremola: spigoli che si accendono e si spengono */
+@keyframes bubble-flicker {
+  0%,
+  100% {
+    clip-path: polygon(50% 2%, 84% 18%, 98% 52%, 82% 86%, 50% 99%, 17% 85%, 2% 51%, 17% 17%);
+  }
+  33% {
+    clip-path: polygon(50% 5%, 88% 14%, 95% 55%, 85% 90%, 47% 96%, 12% 88%, 5% 48%, 14% 13%);
+  }
+  66% {
+    clip-path: polygon(52% 1%, 81% 20%, 99% 47%, 79% 83%, 52% 98%, 20% 82%, 1% 55%, 20% 20%);
+  }
+}
+
+/* Camera oscura — la goccia di sviluppo pende e si assesta */
+@keyframes bubble-sag {
+  0%,
+  100% {
+    border-radius: 50% 50% 50% 50% / 58% 58% 42% 42%;
+  }
+  50% {
+    border-radius: 50% 50% 50% 50% / 52% 52% 48% 48%;
+  }
+}
+
+/* alone pulsante delle lanterne e delle braci */
+@keyframes bubble-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+
+/* --- ingresso di ogni nuova foto: cambia col mondo visivo ---
+   agiscono solo su opacity e filter, così non toccano la rotazione */
+@keyframes photo-tide {
+  from {
+    opacity: 0;
+    filter: blur(7px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes photo-dawn {
+  from {
+    opacity: 0;
+    filter: brightness(0.45) saturate(0.5);
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    filter: brightness(1) saturate(1);
+  }
+}
+
+@keyframes photo-flash {
+  from {
+    opacity: 0.35;
+    filter: brightness(2.6) contrast(1.4);
+  }
+  to {
+    opacity: 1;
+    filter: brightness(1) contrast(1);
+  }
+}
+
+@keyframes photo-develop {
+  from {
+    opacity: 0;
+    filter: brightness(1.9) contrast(0.25) sepia(0.7);
+  }
+  35% {
+    opacity: 1;
+    filter: brightness(1.4) contrast(0.55) sepia(0.45);
+  }
+  to {
+    opacity: 1;
+    filter: brightness(1) contrast(1) sepia(0);
+  }
+}
+
+/* --- disfacimento delle bolle, uno per mondo --- */
+
+/* Notte: anelli concentrici che si allargano piano */
+@keyframes pop-ripple {
+  from {
+    transform: scale(0.6);
+    opacity: 0.85;
+  }
+  to {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* Brace: scintille che salgono e ricadono */
+@keyframes pop-spark {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  55% {
+    transform: translate(calc(var(--dx) * 0.6), calc(var(--dy) * 0.6 - 26px)) scale(0.8);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(var(--dx), calc(var(--dy) + 34px)) scale(0.2);
+    opacity: 0;
+  }
+}
+
+/* Camera oscura: una macchia d'inchiostro che si spande e sbiadisce */
+@keyframes pop-ink {
+  from {
+    transform: scale(0.35);
+    opacity: 0.75;
+    filter: blur(2px);
+  }
+  to {
+    transform: scale(1.9);
+    opacity: 0;
+    filter: blur(10px);
+  }
+}
+
+/* i cassetti della camera di sviluppo si aprono con un respiro */
+@keyframes dev-open {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* il cartello del capitolo entra in scena */
+@keyframes chapter-card {
+  from {
+    opacity: 0;
+    scale: 0.88;
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    filter: blur(0);
+  }
+}
+
+/* il frame lampeggia col colore della bolla scelta */
+@keyframes frame-flash {
+  from {
+    opacity: 0.85;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* lenta deriva dell'iridescenza sulla superficie della bolla */
+@keyframes bubble-sheen {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(40deg);
+  }
+}
+
+.bubble-sheen {
+  animation: bubble-sheen 7s ease-in-out infinite;
+}
+
+/* scoppio della bolla: anello che si espande e svanisce */
+@keyframes bubble-pop-ring {
+  from {
+    transform: scale(0.85);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.75);
+    opacity: 0;
+  }
+}
+
+/* goccioline che schizzano via dallo scoppio (direzione per-goccia via --dx/--dy) */
+@keyframes bubble-pop-drop {
+  from {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.9;
+  }
+  to {
+    transform: translate(var(--dx), var(--dy)) scale(0.25);
+    opacity: 0;
+  }
+}
+
+/* la bolla si riforma con un piccolo overshoot elastico */
+@keyframes bubble-regen {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* frantumi della roccia-reset: prima si sollevano, poi la gravità li tira giù */
+@keyframes shard-fly-1 {
+  45% {
+    transform: translate(-12px, -14px) rotate(-22deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-24px, 24px) rotate(-65deg);
+    opacity: 0;
+  }
+}
+@keyframes shard-fly-2 {
+  45% {
+    transform: translate(4px, -18px) rotate(15deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(10px, 22px) rotate(50deg);
+    opacity: 0;
+  }
+}
+@keyframes shard-fly-3 {
+  45% {
+    transform: translate(16px, -10px) rotate(30deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(28px, 26px) rotate(75deg);
+    opacity: 0;
+  }
+}
+@keyframes shard-fly-4 {
+  45% {
+    transform: translate(-16px, -4px) rotate(-18deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-26px, 20px) rotate(-55deg);
+    opacity: 0;
+  }
+}
+@keyframes shard-fly-5 {
+  45% {
+    transform: translate(8px, -8px) rotate(12deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(18px, 28px) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+/* sbuffi di polvere a ogni colpo sulla roccia */
+@keyframes dust-1 {
+  from {
+    transform: translate(0, 0);
+    opacity: 0.9;
+  }
+  to {
+    transform: translate(-11px, -13px);
+    opacity: 0;
+  }
+}
+@keyframes dust-2 {
+  from {
+    transform: translate(0, 0);
+    opacity: 0.8;
+  }
+  to {
+    transform: translate(-3px, -16px);
+    opacity: 0;
+  }
+}
+@keyframes dust-3 {
+  from {
+    transform: translate(0, 0);
+    opacity: 0.9;
+  }
+  to {
+    transform: translate(6px, -14px);
+    opacity: 0;
+  }
+}
+@keyframes dust-4 {
+  from {
+    transform: translate(0, 0);
+    opacity: 0.7;
+  }
+  to {
+    transform: translate(13px, -10px);
+    opacity: 0;
+  }
+}
+@keyframes dust-5 {
+  from {
+    transform: translate(0, 0);
+    opacity: 0.7;
+  }
+  to {
+    transform: translate(-14px, -6px);
+    opacity: 0;
+  }
+}
+
+/* la punta della carota tagliata dalla ghigliottina cade e ruota */
+@keyframes carrot-fall {
+  40% {
+    transform: translate(3px, 6px) rotate(14deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(10px, 22px) rotate(42deg);
+    opacity: 0;
+  }
+}
+
+/* la roccia si rigenera: cade, atterra con squash e si assesta */
+@keyframes rock-regrow {
+  0% {
+    transform: translateY(-16px) scale(0.3);
+    opacity: 0;
+  }
+  55% {
+    transform: translateY(0) scale(1.08, 0.88);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(0) scale(0.95, 1.06);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
