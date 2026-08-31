@@ -1,0 +1,33 @@
+name: rilascio
+
+# Si attiva quando si spinge un tag di versione (es. v1.1.0): costruisce
+# l'eseguibile Windows e lo allega alla release, così chi scarica non deve
+# compilare nulla.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - name: Costruisci l'eseguibile
+        run: npm run build:win
+      - name: Pubblica la release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$env:GITHUB_REF_NAME" `
+            --title "pic&pick $env:GITHUB_REF_NAME" `
+            --generate-notes `
+            (Get-ChildItem dist/*.exe | ForEach-Object { $_.FullName })

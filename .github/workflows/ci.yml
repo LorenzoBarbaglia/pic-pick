@@ -1,0 +1,21 @@
+name: controlli
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verifica:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Controllo dei tipi
+        run: npm run typecheck
+      - name: Build
+        run: npm run build
